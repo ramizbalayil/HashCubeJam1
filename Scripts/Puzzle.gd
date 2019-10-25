@@ -1,13 +1,13 @@
 extends GridContainer
 
 onready var puzzle = preload("res://Assets/Images/test_puzzle.png")
+onready var empty_cell = preload("res://Assets/Images/empty_cell.png")
 onready var cell_scene = preload("res://Scenes/Cell.tscn")
 onready var puzzle_size = Vector2(puzzle.get_width(), puzzle.get_height())
 onready var divider = 3
 onready var cell_width = puzzle_size.x / divider
 onready var cell_height = puzzle_size.y / divider
 
-signal cell_selected
 
 func _ready():
 	set_up_puzzle_grid()
@@ -27,18 +27,31 @@ func add_texture_to_grid():
 		for j in range(0, divider):
 			var cell = cell_scene.instance()
 			cell.rect_min_size = Vector2(cell_width, cell_height)
-			cell.set_cell(cell_count, i, j, puzzle)
+			cell.set_cell(i, j)
+			cell.set_value(cell_count, puzzle)
 			cell_count += 1
-			cell.set_image()
 			add_child(cell)
 
 	var cell = cell_scene.instance()
 	cell.rect_min_size = Vector2(cell_width, cell_height)
+	cell.set_cell(divider, 0)
+	cell.set_value(-1, empty_cell)
 	add_child(cell)
 
-func _on_cell_selected(obj):
-	print(obj)
-	pass
+func get_neighbors(row, col):
+	var neighbors = []
+	if (row + 1 < divider):
+		neighbors.push_front(get_cell(row + 1, col))
+	if (row - 1 > -1):
+		neighbors.push_front(get_cell(row - 1, col))
+	if (col + 1 < divider + 1):
+		neighbors.push_front(get_cell(row, col + 1))
+	if (col - 1 > -1):
+		neighbors.push_front(get_cell(row, col - 1))
 
-func move_cell():
-	pass
+	return neighbors
+
+func get_cell(row, col):
+	return get_child(row * divider + col)
+
+
